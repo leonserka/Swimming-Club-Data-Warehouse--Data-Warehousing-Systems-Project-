@@ -1,0 +1,104 @@
+BEGIN;
+
+CREATE TABLE sezona (
+    sezona_id INTEGER PRIMARY KEY,
+    naziv VARCHAR(20) NOT NULL UNIQUE,
+    datum_pocetka DATE NOT NULL,
+    datum_zavrsetka DATE NOT NULL,
+    CHECK (datum_zavrsetka > datum_pocetka)
+);
+
+CREATE TABLE clan (
+    clan_id INTEGER PRIMARY KEY,
+    ime VARCHAR(50) NOT NULL,
+    prezime VARCHAR(50) NOT NULL,
+    datum_rodenja DATE NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    datum_uclanjenja DATE NOT NULL
+);
+
+CREATE TABLE trener (
+    trener_id INTEGER PRIMARY KEY,
+    ime VARCHAR(50) NOT NULL,
+    prezime VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE bazen (
+    bazen_id INTEGER PRIMARY KEY,
+    naziv VARCHAR(100) NOT NULL UNIQUE,
+    adresa VARCHAR(100) NOT NULL,
+    broj_staza INTEGER NOT NULL CHECK (broj_staza > 0)
+);
+
+CREATE TABLE grupa (
+    grupa_id INTEGER PRIMARY KEY,
+    sezona_id INTEGER NOT NULL REFERENCES sezona(sezona_id),
+    trener_id INTEGER NOT NULL REFERENCES trener(trener_id),
+    bazen_id INTEGER NOT NULL REFERENCES bazen(bazen_id),
+    naziv VARCHAR(80) NOT NULL,
+    razina VARCHAR(30) NOT NULL CHECK (razina IN ('pocetna', 'srednja', 'natjecateljska')),
+    UNIQUE (sezona_id, naziv)
+);
+
+CREATE TABLE upis (
+    upis_id INTEGER PRIMARY KEY,
+    clan_id INTEGER NOT NULL REFERENCES clan(clan_id),
+    grupa_id INTEGER NOT NULL REFERENCES grupa(grupa_id),
+    datum_od DATE NOT NULL,
+    datum_do DATE,
+    CHECK (datum_do IS NULL OR datum_do >= datum_od),
+    UNIQUE (clan_id, grupa_id, datum_od)
+);
+
+CREATE TABLE termin (
+    termin_id INTEGER PRIMARY KEY,
+    grupa_id INTEGER NOT NULL REFERENCES grupa(grupa_id),
+    dan_u_tjednu INTEGER NOT NULL CHECK (dan_u_tjednu BETWEEN 1 AND 7),
+    vrijeme_pocetka TIME NOT NULL,
+    trajanje_minuta INTEGER NOT NULL CHECK (trajanje_minuta > 0),
+    UNIQUE (grupa_id, dan_u_tjednu, vrijeme_pocetka)
+);
+
+CREATE TABLE trening (
+    trening_id INTEGER PRIMARY KEY,
+    termin_id INTEGER NOT NULL REFERENCES termin(termin_id),
+    datum_treninga DATE NOT NULL,
+    status VARCHAR(20) NOT NULL CHECK (status IN ('odrzan', 'otkazan')),
+    UNIQUE (termin_id, datum_treninga)
+);
+
+CREATE TABLE dolaznost (
+    dolaznost_id INTEGER PRIMARY KEY,
+    upis_id INTEGER NOT NULL REFERENCES upis(upis_id),
+    trening_id INTEGER NOT NULL REFERENCES trening(trening_id),
+    status VARCHAR(20) NOT NULL CHECK (status IN ('prisutan', 'odsutan', 'opravdano')),
+    UNIQUE (upis_id, trening_id)
+);
+
+CREATE TABLE tip_clanarine (
+    tip_clanarine_id INTEGER PRIMARY KEY,
+    naziv VARCHAR(50) NOT NULL UNIQUE,
+    mjesecni_iznos NUMERIC(8,2) NOT NULL CHECK (mjesecni_iznos > 0)
+);
+
+CREATE TABLE obracun_clanarine (
+    obracun_id INTEGER PRIMARY KEY,
+    upis_id INTEGER NOT NULL REFERENCES upis(upis_id),
+    tip_clanarine_id INTEGER NOT NULL REFERENCES tip_clanarine(tip_clanarine_id),
+    mjesec DATE NOT NULL CHECK (EXTRACT(DAY FROM mjesec) = 1),
+    iznos NUMERIC(8,2) NOT NULL CHECK (iznos > 0),
+    rok_placanja DATE NOT NULL,
+    UNIQUE (upis_id, mjesec)
+);
+
+CREATE TABLE uplata (
+    uplata_id INTEGER PRIMARY KEY,
+    obracun_id INTEGER NOT NULL REFERENCES obracun_clanarine(obracun_id),
+    datum_uplate DATE NOT NULL,
+    iznos NUMERIC(8,2) NOT NULL CHECK (iznos > 0),
+    nacin_placanja VARCHAR(20) NOT NULL CHECK (nacin_placanja IN ('kartica', 'gotovina', 'racun'))
+);
+
+COMMIT;
+
