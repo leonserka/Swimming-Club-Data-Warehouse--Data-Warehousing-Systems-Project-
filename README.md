@@ -51,14 +51,46 @@ The warehouse contains:
 
 The fact table stores record, attendance, and absence counts. Both absent (`odsutan`) and excused (`opravdano`) statuses count as absences in the current design.
 
+## PostgreSQL in VS Code
+
+1. Install [PostgreSQL for Windows](https://www.postgresql.org/download/windows/) locally and remember the password you set for the `postgres` user. Make sure the PostgreSQL service is running.
+2. Open this project folder in VS Code and install Microsoft's [PostgreSQL extension](https://marketplace.visualstudio.com/items?itemName=ms-ossdata.vscode-pgsql) (`ms-ossdata.vscode-pgsql`).
+3. Open the PostgreSQL sidebar, add a connection, and enter your local settings:
+
+   | Setting | Typical local value |
+   | --- | --- |
+   | Host | `localhost` |
+   | Port | `5432` |
+   | User | `postgres` |
+   | Password | Your installation password |
+   | Database | `postgres` initially, then `swimming_club` |
+
+4. While connected to `postgres`, create the seminar database once. Run this statement on its own, outside a transaction:
+
+   ```sql
+   CREATE DATABASE swimming_club;
+   ```
+
+   Skip this step if the database already exists. Use an empty database for the initial setup.
+5. Connect to `swimming_club` and check the active connection:
+
+   ```sql
+   SELECT current_database(), version();
+   ```
+
+6. Open and execute each complete SQL file in the order listed below, using the extension's query execution action. Include the `BEGIN` and `COMMIT` statements in each file. Keep the same `swimming_club` connection for all three scripts.
+7. Refresh the database explorer to see the operational tables in `public` and the five warehouse tables in `dw`. The warehouse tables remain empty until a loading process is implemented.
+
+Alternatively, run the commands below in VS Code's integrated terminal. This requires `psql` on your PATH; if it is not recognized, add your PostgreSQL installation's `bin` directory to PATH and restart the terminal.
+
 ## Running the SQL scripts
 
 Use PostgreSQL and a new, empty database. Execute these scripts in order, in the same database, using a SQL client such as pgAdmin or `psql`:
 
 ```sh
-psql -d swimming_club -v ON_ERROR_STOP=1 -f 01_plivacki_klub_relacijska_baza.sql
-psql -d swimming_club -v ON_ERROR_STOP=1 -f 02_plivacki_klub_testni_podaci.sql
-psql -d swimming_club -v ON_ERROR_STOP=1 -f 04_05_plivacki_klub_skladiste.sql
+psql -h localhost -p 5432 -U postgres -d swimming_club -v ON_ERROR_STOP=1 -f 01_plivacki_klub_relacijska_baza.sql
+psql -h localhost -p 5432 -U postgres -d swimming_club -v ON_ERROR_STOP=1 -f 02_plivacki_klub_testni_podaci.sql
+psql -h localhost -p 5432 -U postgres -d swimming_club -v ON_ERROR_STOP=1 -f 04_05_plivacki_klub_skladiste.sql
 ```
 
 Create `swimming_club` beforehand and adjust the connection settings for your local PostgreSQL installation. Run the scripts once: they are not designed for repeated execution against existing tables or data. The final script lists the five warehouse tables as a structural check.
@@ -73,3 +105,4 @@ Create `swimming_club` beforehand and adjust the connection settings for your lo
 - Complete the presentation and final seminar documentation against the assignment requirements.
 
 All test data is fictional. SQL identifiers and the source materials retain their original Croatian names.
+
