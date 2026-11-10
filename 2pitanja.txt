@@ -1,2 +1,5 @@
-Koliki je postotak dolazaka na treninge po mjesecu, grupi i treneru?
-Koje grupe imaju najviše izostanaka i kako se to mijenja tijekom sezone?
+Postoje li razlike u napretku plivača kod različitih trenera tijekom tri sezone, 
+uzimajući u obzir dob, početne rezultate i redovitost dolazaka?
+
+Je li veća redovitost dolazaka povezana s većim poboljšanjem plivačkih rezultata 
+tijekom tri sezone i razlikuje li se ta povezanost prema treneru i razini grupe?
